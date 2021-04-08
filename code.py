@@ -9,19 +9,18 @@
 import board
 from analogio import AnalogIn
 from digitalio import DigitalInOut
-from dave import basic_sanity, read_thermistor
+from dave import basic_sanity, read_thermistor, Vsys, AIconstant
 import time
 
 
 led = DigitalInOut(board.GP0)
 sensor = AnalogIn(board.GP26_A0)
-volts = AnalogIn(board.A3)
 
 
 while True:
     basic_sanity(led, .5)
     
     Temp=read_thermistor(sensor, 10, 12, 3950, 0)
-    print(f"{Temp}\t{volts.value * ( 10.0/65535 ) - 0.1}")
+    print(f"{Temp}")
     time.sleep(2)
     

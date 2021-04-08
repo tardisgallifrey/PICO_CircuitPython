@@ -1,6 +1,30 @@
+import board
 from digitalio import Direction
+from analogio import AnalogIn
 import time
 import math
+
+#set up A3 (GP29) for analog in
+#special internal pin, reads VBUS/Vsys
+volts = AnalogIn(board.A3)
+
+#return Vsys based on regular USB 5VDC
+#or the equivalent??? 3.3VDC
+#1 = 5VDC 0 = 3.3VDC
+def Vsys(type):
+    if type:
+        return volts.value * ( 10.0 / 65535 ) - 0.1
+    else:
+        return volts.value * ( 6.6 / 65535 ) - .05
+
+# get an analog input constant for either
+# 5 volt range or 3.3V range
+# 1 = 5VDC 0 = 3.3VDC
+def AIconstant(type):
+    if type:
+        return 5.0 / 65535
+    else:
+        return 3.3 / 65535
 
 #Basic Sanity Test light
 #send in a set up pin and seconds
@@ -25,11 +49,11 @@ def read_thermistor(thermistor, Ro, Rseries, Beta, celsius):
     To = 298.15           #Nominal Temperature
     
     #Vrt = Voltage across thermistor
-    Vrt = thermistor.value * (3.27 / ( 65535 )) 
+    Vrt = thermistor.value * ( Vsys(0) / ( 65535 )) 
     
     #Convert voltage measured to resistance value
     #All Resistances are in kilo ohms.
-    R = (Vrt * Rseries) / (3.27 - Vrt)
+    R = (Vrt * Rseries) / ( Vsys(0) - Vrt)
       
     #Use R value in steinhart and hart equation
     #Calculate temperature value in kelvin
@@ -37,6 +61,6 @@ def read_thermistor(thermistor, Ro, Rseries, Beta, celsius):
     Tc = T - 273.15               #Converting kelvin to celsius
     Tf = Tc * 9.0 / 5.0 + 32.0    #Converting celsius to Fahrenheit
     if celsius:
-        return Tc
+        return "{:.1f}".format(Tc)
     else:
-        return Tf
+        return "{:.1f}".format(Tf)
